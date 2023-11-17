@@ -62,7 +62,11 @@ class EmotionCNN(nn.Module):
         return x
 
 # Instantiate the model
-model = EmotionCNN()
+# model = EmotionCNN()
 
-# Print the model architecture
-print(model)
+'''
+Train the model with dataset
+'''
+
+
+

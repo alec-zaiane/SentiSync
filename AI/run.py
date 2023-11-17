@@ -1,6 +1,7 @@
 import dlib
 import cv2
 
+
 # Load the pre-trained face detection model from dlib
 detector = dlib.get_frontal_face_detector()
 
@@ -31,4 +32,4 @@ while True:
 
 # Release the video capture object and close windows
 cap.release()
-cv2.destroyAllWindows()
+cv2.destroyAllWindows() 
