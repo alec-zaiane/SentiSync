@@ -12,7 +12,7 @@ detector = dlib.get_frontal_face_detector()
 emotion_model = EmotionCNN()
 
 # Load the trained parameters
-emotion_model.load_state_dict(torch.load('emotion_cnn_model.pth', map_location=torch.device('cpu')))
+emotion_model.load_state_dict(torch.load('emotion_cnn_model2.pth', map_location=torch.device('cpu')))
 
 # Define a function to preprocess the face for the emotion recognition model
 def preprocess_face(face_img):
@@ -56,11 +56,13 @@ while True:
 
         # Perform inference with the emotion recognition model
         with torch.no_grad():
+            emotion_model.eval()
             output = emotion_model(input_data)
             predicted_emotion = torch.argmax(output, dim=1).item()
 
         # Define the emotions (you might need to adjust these based on your model's output)
-        emotions = ["Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral"]
+        # emotions = ["Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral"]
+        emotions = ["Happy", "Neutral", "Sad"]
         emotion_text = emotions[predicted_emotion]
 
         # Draw rectangles around the detected faces

@@ -13,6 +13,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class EmotionDataset(Dataset):
     def __init__(self, root_dir, transform=None):
         self.dataset = datasets.ImageFolder(root=root_dir, transform=transform)
+        self.class_labels = self.dataset.classes
 
     def __len__(self):
         return len(self.dataset)
@@ -28,8 +29,10 @@ transform = transforms.Compose([
 ])
 
 # Load the dataset
-root_dir = 'data/train'
+root_dir = '3emotions_data'
 emotion_dataset = EmotionDataset(root_dir=root_dir, transform=transform)
+
+print("Emotion Order in Training:", emotion_dataset.class_labels)
 
 # Split the dataset into training and validation sets
 train_size = int(0.8 * len(emotion_dataset))
@@ -84,4 +87,4 @@ for epoch in range(num_epochs):
     print(f'Validation Accuracy: {val_accuracy}%')
 
 # Save the trained model
-torch.save(model.state_dict(), 'emotion_cnn_model.pth')
+torch.save(model.state_dict(), 'emotion_cnn_model3.pth')
