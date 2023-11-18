@@ -27,8 +27,8 @@ def reduce_image_count(input_folder, output_folder, target_count):
     print(f"{target_count} images selected and copied to {output_folder}.")
 
 # Example usage:
-input_folder_path = "path/to/your/input/folder"
-output_folder_path = "path/to/your/output/folder"
-target_image_count = 50  # Set your desired number of images
+input_folder_path = "C:/Users/shadi/OneDrive/Documents/GitHub/dataset/train/neutral"
+output_folder_path = "C:/Users/shadi/OneDrive/Documents/dataset3/neutral"
+target_image_count = 4000  # Set your desired number of images
 
 reduce_image_count(input_folder_path, output_folder_path, target_image_count)
