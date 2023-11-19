@@ -108,3 +108,7 @@ def main():
     data_svr.join()
         
     print("[green]Server finished.[/green]")
+
+
+if __name__ == "__main__":
+    main()
