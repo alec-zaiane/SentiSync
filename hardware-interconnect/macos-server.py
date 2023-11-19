@@ -5,8 +5,10 @@ import cv2
 import pickle
 import pyaudio
 from rich import print
+import time
 
-local_ip = socket.gethostbyname(socket.gethostname())
+local_ip = ""
+local_ip = "192.168.1.97"
 print(f"[yellow]Local IP address: {local_ip}[/yellow]")
 
 assert local_ip != "", "Please set the local IP address of the server."
@@ -97,8 +99,10 @@ def main():
     print("Starting server...")
     facetime_svr = threading.Thread(target=serve_facetime)
     facetime_svr.start()
+    time.sleep(0.1)
     audio_svr = threading.Thread(target=serve_audio)
     audio_svr.start()
+    time.sleep(0.1)
     data_svr = threading.Thread(target=receive_data)
     data_svr.start()
     print("[green]Server started.[/green]")
