@@ -89,4 +89,5 @@ def main():
             audio_queue.get()
 
 
-        
+if __name__ == '__main__':
+    main()
