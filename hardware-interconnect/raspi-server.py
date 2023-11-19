@@ -1,9 +1,7 @@
-import cv2
 import socket
-import pickle
-import struct
 import threading
 import RPi.GPIO as GPIO
+import time
 
 # Create a socket connection
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -11,14 +9,9 @@ server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 bindip = "192.168.1.100"
 server_socket.bind((bindip, 5555))  # Change the IP and port as needed
 server_socket.listen(0)
+print(f"Waiting for connection on {bindip}:5555...")
 connection, client_address = server_socket.accept()
 print("Connection from", client_address)
-
-# Open the camera
-cap = cv2.VideoCapture("/dev/video0")  # Use 0 for the default camera
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 720)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 405)
-print("camera opened")
 
 
 
@@ -38,6 +31,13 @@ def receive_data():
             break
         # Process the received data as needed
         print("Received data:", data.decode("utf-8"))
+        data = data.decode("utf-8")
+        if data == "beep":
+            GPIO.output(17, GPIO.HIGH)
+            time.sleep(0.1)
+            GPIO.output(17, GPIO.LOW)
+        elif data == "quit":
+            break
 
 # Start a separate thread for receiving data
 receive_thread = threading.Thread(target=receive_data)
@@ -46,20 +46,9 @@ print("receive thread started")
 
 try:
     while True:
-        # Read a frame from the webcam
-        ret, frame = cap.read()
-        #frame = "Test hello :) yippee"
-        result, frame = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 50])
-        if result:
-
-            # Serialize the frame
-            data = pickle.dumps(frame)
-            # Pack the serialized frame and send it
-            size = struct.pack("=L", len(data))
-            connection.sendall(size + data)
+        pass
 
 finally:
-    cap.release()
     connection.close()
     server_socket.close()
 

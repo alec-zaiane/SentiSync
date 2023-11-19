@@ -9,7 +9,11 @@ import time
 
 local_ip = ""
 local_ip = "192.168.1.99"
+
 print(f"[yellow]Local IP address: {local_ip}[/yellow]")
+raspi_ip = "192.168.1.100"
+raspi_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+print(f"[yellow]Raspberry Pi IP address: {raspi_ip}[/yellow]")
 
 assert local_ip != "", "Please set the local IP address of the server."
 
@@ -113,16 +117,33 @@ def receive_data():
         data = pickle.loads(data)
         # Process the received data as needed
 
-        user_em, speaker_em = data[0], data[1]
+        speaker_em, user_em = data[0], data[1]
         img = np.zeros((200,500))
-        img = cv2.putText(img, f"user: {user_em}", (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
-        img = cv2.putText(img, f"speaker: {speaker_em}", (0, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+        colours = {"Angry":(255,128,128), 
+                   "Disgust":(128,255,128),
+                    "Fear":(222,125,55),
+                    "Happy":(255,255,128),
+                    "Sad":(128,128,255),
+                    "Surprise":(128,255,255),
+                    'Neutral':(255,255,255)}
+        speaker_col = colours.get(speaker_em, (255,255,255))
+        user_col = colours.get(user_em, (255,255,255))
+        img = cv2.putText(img, f"user: {user_em}", (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, user_col, 2)
+        img = cv2.putText(img, f"speaker: {speaker_em}", (0, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, speaker_col, 2)
         cv2.imshow("data", img)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
     data_connection.close()
     
+def setup_raspi():
+    raspi_socket.connect((raspi_ip, 5555))
+    
+
+def send_raspi(message):
+    global raspi_socket
+    raspi_socket.sendall(message.encode("utf-8"))
+
 def main():
     print("Starting server...")
     time.sleep(0.1)
