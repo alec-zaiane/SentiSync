@@ -97,6 +97,7 @@ def receive_data():
     
 def main():
     print("Starting server...")
+    time.sleep(0.1)
     facetime_svr = threading.Thread(target=serve_facetime)
     facetime_svr.start()
     time.sleep(0.1)
