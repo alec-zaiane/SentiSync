@@ -8,7 +8,7 @@ from queue import Queue
 from rich import print
 import pyaudio
 
-connection_ip = '192.168.1.97'
+connection_ip = '192.168.1.99'
 assert connection_ip != '', 'Please set the IP address of the server.'
 
 video_queue = Queue()

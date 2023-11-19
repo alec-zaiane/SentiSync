@@ -8,7 +8,7 @@ from rich import print
 import time
 
 local_ip = ""
-local_ip = "192.168.1.97"
+local_ip = "192.168.1.99"
 print(f"[yellow]Local IP address: {local_ip}[/yellow]")
 
 assert local_ip != "", "Please set the local IP address of the server."
