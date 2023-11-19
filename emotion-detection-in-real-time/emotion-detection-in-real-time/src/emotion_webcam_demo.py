@@ -171,10 +171,16 @@ while True:
                 resized = np.expand_dims(resized, axis=0)
                 resized = resized.astype(float)
                 prediction = emotion_model.predict(resized, verbose=None)
-                if (ewma_speaker, ewma_user)[i] is None:
-                    (ewma_speaker, ewma_user)[i] = prediction
+                if i == 0:
+                    if ewma_speaker is None:
+                        ewma_speaker = prediction
+                    else:
+                        ewma_speaker = alpha*prediction + (1-alpha)*ewma_speaker
                 else:
-                    (ewma_speaker, ewma_user)[i] = alpha*prediction + (1-alpha)*(ewma_speaker, ewma_user)[i]
+                    if ewma_user is None:
+                        ewma_user = prediction
+                    else:
+                        ewma_user = alpha*prediction + (1-alpha)*ewma_user
                 
                 maxindex = int(np.argmax((ewma_speaker, ewma_user)[i]))
                 emotions[i] = emotion_dict[maxindex]
