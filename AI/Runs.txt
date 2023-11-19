@@ -1,0 +1,66 @@
+Runs:
+
+1.
+
+Optimizer: Adam (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    capturable: False
+    differentiable: False
+    eps: 1e-08
+    foreach: None
+    fused: None
+    lr: 0.001
+    maximize: False
+    weight_decay: 0.0001
+), LR: 0.001, Batch Size: 128, Num Epochs: 20, Weight Decay: 0.0001, Validation Accuracy: 73.20833333333333%
+
+
+2. 
+Optimizer: Adam (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    capturable: False
+    differentiable: False
+    eps: 1e-08
+    foreach: None
+    fused: None
+    lr: 0.001
+    maximize: False
+    weight_decay: 0.001
+), LR: 0.001, Batch Size: 128, Num Epochs: 20, Weight Decay: 0.001, Validation Accuracy: 70.41666666666667%
+
+3. 
+Optimizer: Adam (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    capturable: False
+    differentiable: False
+    eps: 1e-08
+    foreach: None
+    fused: None
+    lr: 0.001
+    maximize: False
+    weight_decay: 1e-05
+), LR: 0.001, Batch Size: 128, Num Epochs: 20, Weight Decay: 1e-05, Validation Accuracy: 73.375%
+
+4. 
+
+Optimizer: Adam (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    capturable: False
+    differentiable: False
+    eps: 1e-08
+    foreach: None
+    fused: None
+    lr: 0.01
+    maximize: False
+    weight_decay: 0.0001
+), LR: 0.01, Batch Size: 128, Num Epochs: 20, Weight Decay: 0.0001, Validation Accuracy: 67.5%
+
+
