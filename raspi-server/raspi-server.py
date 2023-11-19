@@ -1,73 +1,50 @@
-# yoinked from https://github.com/NakulLakhotia/Live-Streaming-using-OpenCV-Flask/blob/main/app.py
-from flask import Flask, render_template, Response, request, jsonify
 import cv2
-import cv2
+import socket
+import pickle
+import struct
+import threading
 
-app = Flask(__name__)
+# Create a socket connection
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# bindip is the IP address of the computer running the server program, get it using ipconfig
+bindip = "10.42.0.1"
+server_socket.bind((bindip, 5555))  # Change the IP and port as needed
+server_socket.listen(0)
+connection, client_address = server_socket.accept()
+print("Connection from", client_address)
 
-print("opening camera")
-video_device = "/dev/video0"
-camera = cv2.VideoCapture(video_device) 
-print("camera opened")
+# Open the webcam
+cap = cv2.VideoCapture(0)  # Use 0 for the default camera
 
-camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-print("camera res set")
-
-# for local webcam use cv2.VideoCapture(0)  
-#  for cctv camera use rtsp://username:password@ip_address:554/user=username_password='password'_channel=channel_number_stream=0.sdp' instead of camera
-
-
-def gen_frames():  # generate frame by frame from camera
+# Function to receive data from the separate computer
+def receive_data():
     while True:
-        # Capture frame-by-frame
-        success, frame = camera.read()  # read the camera frame
-        if not success:
-            print("failed to read frame!!!!!")
+        data = connection.recv(1024)  # Adjust buffer size as needed
+        if not data:
             break
-        else:
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
+        # Process the received data as needed
+        print("Received data:", data.decode("utf-8"))
 
+# Start a separate thread for receiving data
+receive_thread = threading.Thread(target=receive_data)
+receive_thread.start()
 
-@app.route('/video_feed')
-def video_feed():
-    #Video streaming route. Put this in the src attribute of an img tag
-    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+try:
+    while True:
+        # Read a frame from the webcam
+        #ret, frame = cap.read()
+        frame = "Test hello :) yippee" * 500
 
+        # Serialize the frame
+        data = pickle.dumps(frame)
 
-@app.route('/')
-def index():
-    """Video streaming home page."""
-    return render_template('index.html')
+        # Pack the serialized frame and send it
+        size = struct.pack("L", len(data))
+        print(type(size))
+        print(size)
+        connection.sendall(size + data)
 
-
-# @app.route('/notify', methods=['POST'])
-# def notify():
-#     data = request.get_json()
-#     notify_value = data.get('notify')
-
-#     if notify_value is None:
-#         return jsonify(error='Invalid JSON payload'), 400
-
-#     # Match the value of "notify" using a match statement
-#     match notify_value:
-#         case 'x':
-#             # Handle case 'x'
-#             # ...
-#             return jsonify(message='Matched case x')
-#         case 'y':
-#             # Handle case 'y'
-#             # ...
-#             return jsonify(message='Matched case y')
-#         case 'z':
-#             # Handle case 'z'
-#             # ...
-#             return jsonify(message='Matched case z')
-#         case _:
-#             return jsonify(error='Unmatched case'), 400
-
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+finally:
+    cap.release()
+    connection.close()
+    server_socket.close()
