@@ -64,6 +64,17 @@ if not USE_WEBCAM:
                 best_found_ctrpoint = current_ctr
                 best_found_dist = current_dist
         return best_found_face
+    
+    send_data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    send_data_socket.connect((connection_ip, 5557))
+    def send_data(speaker_em, user_em):
+        global send_data_socket
+        s = f"{speaker_em},{user_em}"
+        send_data_socket.sendall(s.encode("utf-8"))
+
+    ewma_user = None
+    ewma_speaker = None
+    alpha = 0.3
 
     
 
@@ -152,20 +163,30 @@ while True:
         speakerface = find_best_face(speakerfaces, speakerframe)
         userface = find_best_face(userfaces, userframe)
 
-        for (x,y,w,h), img in ((speakerface, speakerframe), (userface, userframe)):
+        emotions = ['','']
+        for i,((x,y,w,h), img) in enumerate((speakerface, speakerframe), (userface, userframe)):
             face_img = img[y:y+h, x:x+w]
             if not face_img.size==0:
                 resized = cv2.resize(face_img, (96,96))
                 resized = np.expand_dims(resized, axis=0)
                 resized = resized.astype(float)
                 prediction = emotion_model.predict(resized, verbose=None)
-                maxindex = int(np.argmax(prediction))
+                if (ewma_speaker, ewma_user)[i] is None:
+                    (ewma_speaker, ewma_user)[i] = prediction
+                else:
+                    (ewma_speaker, ewma_user)[i] = alpha*prediction + (1-alpha)*(ewma_speaker, ewma_user)[i]
+                
+                maxindex = int(np.argmax((ewma_speaker, ewma_user)[i]))
+                emotions[i] = emotion_dict[maxindex]
 
                 cv2.putText(img, emotion_dict[maxindex], (x + 20, y - 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2,
                             cv2.LINE_AA)
                 
                 cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
+            else:
+                emotions[i] = 'None'
+        
+        send_data(emotions[0], emotions[1])
         cv2.imshow("user",userframe)
         cv2.imshow("speaker",speakerframe)
 

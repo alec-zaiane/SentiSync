@@ -26,6 +26,9 @@ def process_screen(frame):
     framecrop1 = frame[cropin1[1]:cropin1[3], cropin1[0]:cropin1[2]]
     cropin2 = (1589, 747, -40, -168)
     framecrop2 = frame[cropin2[1]:cropin2[3], cropin2[0]:cropin2[2]]
+    # now rescale framecrop1
+    framecrop1 = cv2.resize(framecrop1, (0,0), fx=0.7, fy=0.7)
+
     result1, framecrop1 = cv2.imencode(".jpg", framecrop1, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
     result2, framecrop2 = cv2.imencode(".jpg", framecrop2, [int(cv2.IMWRITE_JPEG_QUALITY), 90]) # higher quality for tiny image
     return (result1 and result2), (framecrop1, framecrop2)
@@ -105,7 +108,8 @@ def receive_data():
             print("data connection closed")
             break
         # Process the received data as needed
-        print("Received data:", data.decode("utf-8"))
+        user_em, speaker_em = data.decode("utf-8").split(",")
+        print(f"{f'user: {user_em}'.ljust(20)}{f'speaker: {speaker_em}'.ljust(20)}", end="\r")
 
     data_connection.close()
     
