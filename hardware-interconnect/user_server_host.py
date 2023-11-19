@@ -134,21 +134,29 @@ def receive_data():
             # if emotions have been the same for the last n frames, possibly notify
             notify_if_needed(speaker_em, user_em)
 
-        img = np.zeros((200,500))
+        #img = np.zeros((200,500))
+        # initialize with a nice BG colour
+        img = np.array([[[71,48,34]]*350]*150, dtype=np.uint8)
         colours = {"Angry":(255,128,128), 
                    "Disgust":(128,255,128),
                     "Fear":(222,125,55),
                     "Happy":(255,255,128),
                     "Sad":(128,128,255),
                     "Surprise":(128,255,255),
-                    'Neutral':(255,255,255)}
-        speaker_col = colours.get(speaker_em, (255,255,255))
-        user_col = colours.get(user_em, (255,255,255))
-        img = cv2.putText(img, f"user: {user_em}", (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, user_col, 2)
-        img = cv2.putText(img, f"speaker: {speaker_em}", (0, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, speaker_col, 2)
-        if speaker_em == "Angry":
-            send_raspi("beep")
-        cv2.imshow("data", img)
+                    'Neutral':(255,255,255),
+                    'None':(128,128,128)}
+        emfix = {"Disgust":"Disgusted","Fear":"Scared","Surprise":"Surprised"}
+        speaker_col = colours.get(speaker_em)
+        user_col = colours.get(user_em)
+        speaker_col = speaker_col[::-1] #swizzle RGB -> BGR
+        user_col = user_col[::-1]
+        user_em, speaker_em = str(user_em), str(speaker_em)
+        youtext = f"You look: {emfix.get(user_em,user_em)}" if user_em != "None" else "Cannot find you"
+        themtext = f"They look: {emfix.get(speaker_em,speaker_em)}" if speaker_em != "None" else "Cannot find them"
+
+        img = cv2.putText(img, youtext, (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, user_col, 2)
+        img = cv2.putText(img, themtext, (20, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, speaker_col, 2)
+        cv2.imshow("Emotions", img)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
@@ -214,6 +222,8 @@ def notify_if_needed(speaker_em, user_em):
                         ("Neutral", "Neutral"): None}
     global last_notification
     global notification_timeout
+    if notification_map.get((speaker_em, user_em), None) is None:
+        return
     if time.time() - last_notification > notification_timeout:
         last_notification = time.time()
         notification = notification_map.get((speaker_em, user_em), None)
