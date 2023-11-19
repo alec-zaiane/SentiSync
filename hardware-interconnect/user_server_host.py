@@ -103,14 +103,17 @@ def receive_data():
     data_connection, data_client_address = data_socket.accept()
     print(f"Data connection established with {data_client_address}.")
     while not kill_threads:
-        data = data_connection.recv(1024)  # Adjust buffer size as needed
-        if not data:
-            print("data connection closed")
-            break
+        data = b''
+        while len(data) < struct.calcsize("=L"):
+            data = data_connection.recv(1024)  # Adjust buffer size as needed
+        # Receive the rest of serialized frame
+        while len(data) < struct.unpack("=L", data[:struct.calcsize("=L")])[0]:
+            data += data_connection.recv(1024)
+        data = data[struct.calcsize("=L"):]
+        data = pickle.loads(data)
         # Process the received data as needed
-        data = data.decode("utf-8")
-        print(data)
-        user_em, speaker_em = data.split("|")
+
+        user_em, speaker_em = data[0], data[1]
         img = np.zeros((200,500))
         img = cv2.putText(img, f"user: {user_em}", (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
         img = cv2.putText(img, f"speaker: {speaker_em}", (0, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)

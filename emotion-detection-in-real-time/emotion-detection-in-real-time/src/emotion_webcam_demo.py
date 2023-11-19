@@ -69,8 +69,9 @@ if not USE_WEBCAM:
     send_data_socket.connect((connection_ip, 5557))
     def send_data(speaker_em, user_em):
         global send_data_socket
-        s = f"{speaker_em}|{user_em}"
-        send_data_socket.sendall(s.encode("utf-8"))
+        data = (speaker_em, user_em)
+        s = pickle.dumps(data)
+        send_data_socket.sendall(struct.pack("=L", len(s)) + s)
 
     ewma_user = None
     ewma_speaker = None
