@@ -160,3 +160,5 @@ cython_debug/
 #.idea/
 AI/data/
 AI/3emotions_data/
+datasets/
+images/
