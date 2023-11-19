@@ -4,7 +4,6 @@ import pickle
 import struct
 import threading
 import RPi.GPIO as GPIO
-import time
 
 # Create a socket connection
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -15,16 +14,20 @@ server_socket.listen(0)
 connection, client_address = server_socket.accept()
 print("Connection from", client_address)
 
-# Open the webcam
+# Open the camera
 cap = cv2.VideoCapture("/dev/video0")  # Use 0 for the default camera
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 720)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 405)
+print("camera opened")
+
+
 
 # setup GPIO
 # 17 is beep pin
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(17, GPIO.OUT)
 GPIO.output(17, GPIO.LOW)
+print("GPIO setup")
 
 
 # Function to receive data from the separate computer, use this to receive commands for haptic feedback
@@ -39,6 +42,7 @@ def receive_data():
 # Start a separate thread for receiving data
 receive_thread = threading.Thread(target=receive_data)
 receive_thread.start()
+print("receive thread started")
 
 try:
     while True:
