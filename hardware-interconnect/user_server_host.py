@@ -108,8 +108,15 @@ def receive_data():
             print("data connection closed")
             break
         # Process the received data as needed
-        user_em, speaker_em = data.decode("utf-8").split(",")
-        print(f"{f'user: {user_em}'.ljust(20)}{f'speaker: {speaker_em}'.ljust(20)}", end="\r")
+        data = data.decode("utf-8")
+        print(data)
+        user_em, speaker_em = data.split("|")
+        img = np.zeros((200,500))
+        img = cv2.putText(img, f"user: {user_em}", (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+        img = cv2.putText(img, f"speaker: {speaker_em}", (0, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+        cv2.imshow("data", img)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
     data_connection.close()
     
