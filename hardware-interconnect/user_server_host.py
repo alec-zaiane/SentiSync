@@ -144,7 +144,6 @@ def receive_data():
                     'Neutral':(255,255,255)}
         speaker_col = colours.get(speaker_em, (255,255,255))
         user_col = colours.get(user_em, (255,255,255))
-        print(f"speaker: {speaker_em}, user: {user_em}")
         img = cv2.putText(img, f"user: {user_em}", (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, user_col, 2)
         img = cv2.putText(img, f"speaker: {speaker_em}", (0, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, speaker_col, 2)
         if speaker_em == "Angry":

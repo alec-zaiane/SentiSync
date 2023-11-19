@@ -13,7 +13,7 @@ server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 bindip = "192.168.1.100"
 
 # Function to receive data from the separate computer, use this to receive commands for haptic feedback
-def receive_data():
+def receive_data(connection):
     while True:
         data = connection.recv(1024)  # Adjust buffer size as needed
         if not data:
