@@ -14,7 +14,7 @@ connection, client_address = server_socket.accept()
 print("Connection from", client_address)
 
 # Open the webcam
-cap = cv2.VideoCapture(0)  # Use 0 for the default camera
+cap = cv2.VideoCapture("/dev/video0")  # Use 0 for the default camera
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 720)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 405)
 
