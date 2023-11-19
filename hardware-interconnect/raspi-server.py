@@ -61,8 +61,11 @@ def main():
 if __name__ == "__main__":
     while True:
         try:
+            print("=== Starting server ===")
             main()
         except KeyboardInterrupt:
+            print("Exiting...")
             break
         except:
+            print("=== Restarting server ===")
             pass
