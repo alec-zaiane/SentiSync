@@ -19,6 +19,9 @@ assert local_ip != "", "Please set the local IP address of the server."
 
 kill_threads = False
 
+notification_timeout = 15
+last_notification = -1 * notification_timeout
+
 
 def process_screen(frame):
     # process the frame here,
@@ -103,6 +106,9 @@ def receive_data():
     data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     data_socket.bind((local_ip, 5557))
     data_socket.listen(0)
+    last_n_user_em = []
+    last_n_speaker_em = []
+    keep_em_n = 5 # <-- reduce to lower number to be more responsive, but likelier to jump the gun
     print(f"Waiting for data connection... (local IP: {local_ip}, port: 5557)")
     data_connection, data_client_address = data_socket.accept()
     print(f"Data connection established with {data_client_address}.")
@@ -118,6 +124,16 @@ def receive_data():
         # Process the received data as needed
 
         speaker_em, user_em = data[0], data[1]
+        last_n_speaker_em.append(speaker_em)
+        last_n_user_em.append(user_em)
+        if len(last_n_speaker_em) > keep_em_n:
+            last_n_speaker_em.pop(0)
+            last_n_user_em.pop(0)
+
+        if all([x == last_n_speaker_em[0] for x in last_n_speaker_em]) and all([x == last_n_user_em[0] for x in last_n_user_em]):
+            # if emotions have been the same for the last n frames, possibly notify
+            notify_if_needed(speaker_em, user_em)
+
         img = np.zeros((200,500))
         colours = {"Angry":(255,128,128), 
                    "Disgust":(128,255,128),
@@ -128,8 +144,11 @@ def receive_data():
                     'Neutral':(255,255,255)}
         speaker_col = colours.get(speaker_em, (255,255,255))
         user_col = colours.get(user_em, (255,255,255))
+        print(f"speaker: {speaker_em}, user: {user_em}")
         img = cv2.putText(img, f"user: {user_em}", (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, user_col, 2)
         img = cv2.putText(img, f"speaker: {speaker_em}", (0, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, speaker_col, 2)
+        if speaker_em == "Angry":
+            send_raspi("beep")
         cv2.imshow("data", img)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
@@ -137,11 +156,74 @@ def receive_data():
     data_connection.close()
     
 def setup_raspi():
+    print("Setting up raspi connection...")
     raspi_socket.connect((raspi_ip, 5555))
+    print("Raspi connection established.")
+
+setup_raspi()
     
+def notify_if_needed(speaker_em, user_em):
+                        # speaker, user -> notification
+    notification_map = {("Angry", "Angry"): "beep",
+                        ("Angry", "Disgust"): "beep",
+                        ("Angry", "Fear"): None,
+                        ("Angry", "Happy"): "beep",
+                        ("Angry", "Sad"): None,
+                        ("Angry", "Surprise"): None,
+                        ("Angry", "Neutral"): None,
+                        ("Disgust", "Angry"): "beep",
+                        ("Disgust", "Disgust"): None,
+                        ("Disgust", "Fear"): "beep",
+                        ("Disgust", "Happy"): "beep",
+                        ("Disgust", "Sad"): None,
+                        ("Disgust", "Surprise"): None,
+                        ("Disgust", "Neutral"): None,
+                        ("Fear", "Angry"): "beep beep",
+                        ("Fear", "Disgust"): "beep",
+                        ("Fear", "Fear"): None,
+                        ("Fear", "Happy"): "beep",
+                        ("Fear", "Sad"): None,
+                        ("Fear", "Surprise"): None,
+                        ("Fear", "Neutral"): None,
+                        ("Happy", "Angry"): "beep beep",
+                        ("Happy", "Disgust"): "beep",
+                        ("Happy", "Fear"): "beep",
+                        ("Happy", "Happy"): None,
+                        ("Happy", "Sad"): "beep",
+                        ("Happy", "Surprise"): None,
+                        ("Happy", "Neutral"): None,
+                        ("Sad", "Angry"): "beep beep",
+                        ("Sad", "Disgust"): "beep",
+                        ("Sad", "Fear"): None,
+                        ("Sad", "Happy"): "beep",
+                        ("Sad", "Sad"): None,
+                        ("Sad", "Surprise"): None,
+                        ("Sad", "Neutral"): "beep",
+                        ("Surprise", "Angry"): "beep beep",
+                        ("Surprise", "Disgust"): None,
+                        ("Surprise", "Fear"): None,
+                        ("Surprise", "Happy"): None,
+                        ("Surprise", "Sad"): None,
+                        ("Surprise", "Surprise"): None,
+                        ("Surprise", "Neutral"): "beep",
+                        ("Neutral", "Angry"): "beep beep",
+                        ("Neutral", "Disgust"): None,
+                        ("Neutral", "Fear"): None,
+                        ("Neutral", "Happy"): None,
+                        ("Neutral", "Sad"): "beep",
+                        ("Neutral", "Surprise"): None,
+                        ("Neutral", "Neutral"): None}
+    global last_notification
+    global notification_timeout
+    if time.time() - last_notification > notification_timeout:
+        last_notification = time.time()
+        notification = notification_map.get((speaker_em, user_em), None)
+        if notification:
+            send_raspi(notification)
 
 def send_raspi(message):
     global raspi_socket
+    print(f"Sending {message} to raspi...")
     raspi_socket.sendall(message.encode("utf-8"))
 
 def main():
