@@ -69,7 +69,7 @@ if not USE_WEBCAM:
     send_data_socket.connect((connection_ip, 5557))
     def send_data(speaker_em, user_em):
         global send_data_socket
-        s = f"{speaker_em},{user_em}"
+        s = f"{speaker_em}|{user_em}"
         send_data_socket.sendall(s.encode("utf-8"))
 
     ewma_user = None
@@ -164,7 +164,7 @@ while True:
         userface = find_best_face(userfaces, userframe)
 
         emotions = ['','']
-        for i,((x,y,w,h), img) in enumerate((speakerface, speakerframe), (userface, userframe)):
+        for i,((x,y,w,h), img) in enumerate(((speakerface, speakerframe), (userface, userframe))):
             face_img = img[y:y+h, x:x+w]
             if not face_img.size==0:
                 resized = cv2.resize(face_img, (96,96))
