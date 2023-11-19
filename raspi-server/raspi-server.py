@@ -50,7 +50,29 @@ def receive_data():
             GPIO.output(17, GPIO.HIGH)
             time.sleep(0.1)
             GPIO.output(17, GPIO.LOW)
+        elif data == "hbd":
+            BEEPER_PIN = 17
 
+            # Define the notes for the "Happy Birthday" song
+            notes = [
+                ('C4', 0.5), ('C4', 0.5), ('D4', 1.0), ('C4', 1.0), ('F4', 1.0), ('E4', 2.0),
+                ('C4', 0.5), ('C4', 0.5), ('D4', 1.0), ('C4', 1.0), ('G4', 1.0), ('F4', 2.0),
+                ('C4', 0.5), ('C4', 0.5), ('C5', 1.0), ('A4', 1.0), ('F4', 1.0), ('E4', 1.0), ('D4', 2.0),
+                ('Bb4', 0.5), ('Bb4', 0.5), ('A4', 1.0), ('F4', 1.0), ('G4', 1.0), ('F4', 2.0)
+            ]
+
+            # Define the frequencies for each note
+            frequencies = {
+                'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00, 'Bb4': 466.16, 'B4': 493.88, 'C5': 523.25
+            }
+
+            pwm = GPIO.PWM(BEEPER_PIN, 100)
+            for note, duration in notes:
+                pwm.ChangeFrequency(frequencies[note])
+                pwm.start(50)
+                time.sleep(duration)
+                pwm.stop()
+                time.sleep(0.05)
 
 # Start a separate thread for receiving data
 receive_thread = threading.Thread(target=receive_data)
