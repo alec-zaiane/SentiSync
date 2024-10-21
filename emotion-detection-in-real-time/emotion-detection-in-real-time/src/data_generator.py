@@ -59,4 +59,4 @@ def data_generator(train_dir, valid_dir, test_dir, train_label, valid_label, tes
                                                      shuffle=False,
                                                      class_mode=None,
                                                      color_mode='rgb')
-return train_generator, valid_generator, test_generator
+    return train_generator, valid_generator, test_generator

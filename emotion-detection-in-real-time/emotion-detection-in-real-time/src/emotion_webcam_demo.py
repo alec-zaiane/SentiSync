@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import torchvision.transforms as transforms
 from PIL import Image
-import dlib
+# import dlib
 import socket, struct, pickle
 import queue
 import threading
@@ -12,7 +12,7 @@ import math
 
 
 
-USE_WEBCAM = False # true to use webcam, false to use raspi server
+USE_WEBCAM = True # true to use webcam, false to use raspi server
 connection_ip = "192.168.1.99"
 video_queue = queue.Queue()
 
